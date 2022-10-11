@@ -9,8 +9,6 @@ class SiteController {
         res.render("home", { courses: multipleMongooseToObject(courses) });
       })
       .catch(next); // .catch((err) => next(err));
-
-    // res.render("home");
   }
 
   // [GET] / search
