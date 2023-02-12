@@ -1,12 +1,29 @@
-<div class="mt-4">
+<form class="mt-4" name="container-form" method="post" action="/courses/handle-form-action">
   <div>
     <h3>Khóa học của tôi</h3>
-    <a href="/me/trash/courses">Thùng rác</a>
+    <a href="/me/trash/courses">Thùng rác ({{deletedCount}})</a>
+
+    <div class="mt-4 d-flex align-items-center">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="checkbox-all" />
+        <label class="form-check-label" for="checkbox-all">
+          Chọn tất cả
+        </label>
+      </div>
+
+      <select class="form-select form-select-sm checkbox-select-all-options" name="action" required>
+        <option value="">-- Hành động --</option>
+        <option value="delete">Xóa</option>
+      </select>
+
+      <button class="btn btn-primary btn-sm disabled btn-submit">Thực hiện</button>
+    </div>
   </div>
 
   <table class="table mt-4">
     <thead>
       <tr>
+        <th scope="col"></th>
         <th scope="col">#</th>
         <th scope="col">Tên khóa học</th>
         <th scope="col">Trình độ</th>
@@ -16,6 +33,16 @@
     <tbody>
       {{#each courses}}
         <tr>
+          <td>
+            <div class="form-check">
+              <input
+                class="form-check-input item-checkbox"
+                type="checkbox"
+                value="{{this._id}}"
+                name="courseIds[]"
+              />
+            </div>
+          </td>
           <th scope="row">{{sum @index 1}}</th>
           <td>{{this.name}}</td>
           <td>{{this.level}}</td>
@@ -40,7 +67,7 @@
       {{/each}}
     </tbody>
   </table>
-</div>
+</form>
 
 {{! Confirm delete course }}
 <div
@@ -68,15 +95,66 @@
 </div>
 
 {{! Delete hidden form }}
-
 <form class="mt-4" method="post" name="delete-course-form"></form>
 
 <script>
-  let deleteForm = document.forms['delete-course-form']; let courseId; const deleteModal =
-  document.getElementById('delete-course-modal'); const btnDeleteCourse =
-  document.getElementById('btn-delete-course'); /* when dialog confirm is clicked */
-  deleteModal.addEventListener('show.bs.modal', event => { const button = event.relatedTarget;
-  courseId = button.getAttribute('data-bs-id') }); /* when delete course btn is clicked */
-  btnDeleteCourse.onclick = function() { deleteForm.action = '/courses/' + courseId +
-  '?_method=delete'; deleteForm.submit(); }
+  let courseId;
+  let deleteForm = document.forms['delete-course-form'];
+  let containerForm = document.forms['container-form'];
+  let deleteModal = document.getElementById('delete-course-modal');
+  let btnDeleteCourse = document.getElementById('btn-delete-course');
+  let checkboxAll = document.getElementById('checkbox-all');
+  let courseItemCheckbox = document.querySelectorAll('.item-checkbox');
+  let btnSubmit = document.querySelector('.btn-submit');
+  let optionAction = document.querySelector('.checkbox-select-all-options');
+  let i= 0;
+  let optionValue = '';
+  
+  // when dialog confirm is clicked 
+  deleteModal.addEventListener('show.bs.modal', event => {
+    let button = event.relatedTarget;
+    courseId = button.getAttribute('data-bs-id')
+  });
+  
+  // when delete course btn is clicked
+  btnDeleteCourse.onclick = function() {
+    deleteForm.action = '/courses/' + courseId + '?_method=delete'; deleteForm.submit();
+  }
+
+  // when chekbox all is changed
+  checkboxAll.onchange = function() {
+    let isCheckedAll = checkboxAll.checked;
+    isCheckedAll ? i = courseItemCheckbox.length : i = 0;
+    hiddenSubmitButton(i);
+    courseItemCheckbox.forEach(item => {
+      item.checked = isCheckedAll;
+    })
+  }
+
+  //when item checkbox is changed
+  courseItemCheckbox.forEach(item => {
+    item.onchange = function() {
+      item.checked ? i++ : i--;
+      checkboxAll.checked = i === courseItemCheckbox.length;
+      hiddenSubmitButton(i);
+    }
+  })
+
+  // choose value for action submit
+  optionAction.onchange = function() {
+    optionValue = optionAction.value;
+    hiddenSubmitButton(i)
+  }
+
+  // add or remove attribute disabed
+  function hiddenSubmitButton(i) {
+    optionValue && i > 0 ?  btnSubmit.classList.remove('disabled') : btnSubmit.classList.add('disabled'); 
+  }
+
+  //submit btn is clicked
+  btnSubmit.onclick = function (event) {
+    event.preventDefault();
+    let isSubmittable = !btnSubmit.classList.contains('disabled')
+    isSubmittable && containerForm.submit()
+  }
 </script>

@@ -10,7 +10,7 @@
         <th scope="col">#</th>
         <th scope="col">Tên khóa học</th>
         <th scope="col">Trình độ</th>
-        <th scope="col" colspan="2">Thời gian tạo</th>
+        <th scope="col" colspan="2">Thời gian xóa</th>
       </tr>
     </thead>
     <tbody>
@@ -19,7 +19,7 @@
           <th scope="row">{{sum @index 1}}</th>
           <td>{{this.name}}</td>
           <td>{{this.level}}</td>
-          <td>{{this.createdAt}}</td>
+          <td>{{this.deletedAt}}</td>
           <td>
             <a href="" class="btn btn-link btn-restore" data-id="{{this._id}}">Khôi phục</a>
             <a
@@ -72,26 +72,26 @@
   let courseId;
   let deleteForm = document.forms['delete-course-form'];
   let restoreForm = document.forms['restore-course-form'];
-  const deleteModal = document.getElementById('delete-course-modal');
-  const btnDeleteCourse = document.getElementById('btn-delete-course');
-  const restoreBtn = document.querySelectorAll('.btn-restore') 
+  let deleteModal = document.getElementById('delete-course-modal');
+  let btnDeleteCourse = document.getElementById('btn-delete-course');
+  let restoreBtn = document.querySelectorAll('.btn-restore');
   
-  //when dialog confirm is clicked 
-  deleteModal.addEventListener('show.bs.modal', event => { const button = event.relatedTarget;
-  courseId = button.getAttribute('data-bs-id') });
-  
-  //when delete course btn is clicked
+  //when dialog confirm is clicked
+  deleteModal.addEventListener('show.bs.modal', event => {
+    let button = event.relatedTarget;
+    courseId = button.getAttribute('data-bs-id');
+
+  }); //when delete course btn is clicked
   btnDeleteCourse.onclick = function() {
     deleteForm.action = '/courses/' + courseId + '/force?_method=delete';
     deleteForm.submit();
-  }
-
+    }
+    
   //when restore course btn is clicked
-  restoreBtn.forEach(item => {
-    item.addEventListener('click', event => {
-      event.preventDefault();
-      const idCourse = item.dataset.id;
-      restoreForm.action = '/courses/' + idCourse + '/restore?_method=patch'; restoreForm.submit();
+  restoreBtn.forEach(item => { item.addEventListener('click', event => {
+    event.preventDefault();
+    let idCourse = item.dataset.id;
+    restoreForm.action = '/courses/' + idCourse + '/restore?_method=patch'; restoreForm.submit();
     })
   })
 </script>
